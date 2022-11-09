@@ -38,6 +38,8 @@
 #define MODBUS_STACK_EXPORT __attribute__ ((visibility ("default")))
 #define MODBUS_STACK_IMPORT __attribute__ ((visibility ("default")))
 
+//#define  MODBUS_STACK_TCPIP_ENABLED 1
+
 typedef unsigned char   	uint8_t;    // 1 byte  0 to 255
 typedef signed char     	int8_t;     // 1 byte -127 to 127
 typedef unsigned short  	uint16_t;   // 2 bytes 0 to 65535
@@ -51,6 +53,7 @@ typedef unsigned long   	ulong32_t;  // unsinged long declarations
 #endif
 
 #define MODBUS_DATA_LENGTH (260)  // Modbus maximum data packet length
+#define MAX_LENGTH_DIR_PIN		3
 
 /*
  ===============================================================================
@@ -434,6 +437,7 @@ typedef struct CtxInfo
 	eParity  m_eParity;			// parity bit supported
 	long	m_lInterframeDelay;  // Interframe delay
 	long	m_lRespTimeout;     // response timeout of the data packet
+	char DirPin[MAX_LENGTH_DIR_PIN]; //Add for NHP board to togle Dir Pin
 #else
 	uint8_t *pu8SerIpAddr;      // TCPIP- IP Address
 	uint16_t u16Port;			// TCPIP - port name

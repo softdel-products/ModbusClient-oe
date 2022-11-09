@@ -1,13 +1,31 @@
-Src/ClientSocket.o: ../Src/ClientSocket.c ..//Inc/SessionControl.h \
- ..//Inc/StackConfig.h ..//Inc/osalLinux.h ..//Inc/API.h \
- ..//Inc/osalLinux.h
+src/ClientSocket.o: ../src/ClientSocket.c \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib.h \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_types.h \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib_errno.h \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_mem_lib.h \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib.h \
+ /home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_str_lib.h \
+ ../src/SessionControl.h ../src/StackConfig.h ../src/osalLinux.h \
+ ../src/API.h ../src/gpio_service.h
 
-..//Inc/SessionControl.h:
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib.h:
 
-..//Inc/StackConfig.h:
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_types.h:
 
-..//Inc/osalLinux.h:
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib_errno.h:
 
-..//Inc/API.h:
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_mem_lib.h:
 
-..//Inc/osalLinux.h:
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_lib.h:
+
+/home/aditya/usbmsd/Modbusclient/sharedlib/inc/safe_str_lib.h:
+
+../src/SessionControl.h:
+
+../src/StackConfig.h:
+
+../src/osalLinux.h:
+
+../src/API.h:
+
+../src/gpio_service.h:

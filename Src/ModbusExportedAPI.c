@@ -30,7 +30,7 @@
 #include <safe_lib.h>
 #include <unistd.h>
 #include <time.h>
-
+#include "gpio_service.h"	//Add for NHP board to togle Dir Pin
  /*
   ===============================================================================
   Global variable definitions
@@ -2444,6 +2444,11 @@ MODBUS_STACK_EXPORT eStackErrorCode getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 	{
 		return STACK_ERROR_INVALID_BAUD_RATE;
 	}
+	//Add for NHP board to togle Dir Pin
+	memset(DirCtrlPin,0x00,sizeof(DirCtrlPin));
+	memcpy_s((void*)DirCtrlPin,(rsize_t) sizeof(DirCtrlPin),(void*)pCtxInfo->DirPin,(rsize_t) sizeof(pCtxInfo->DirPin));
+	InitDirPin(DirCtrlPin);
+	SetValuveDirPin(DirCtrlPin, GPIO_LOW);
 #endif
 
 	// Assign default value

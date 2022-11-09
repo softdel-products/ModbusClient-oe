@@ -8,7 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include Src/subdir.mk
+-include src/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -23,19 +23,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libModbusMasterStack.so
+all: libModbusclient.so
 
 # Tool invocations
-libModbusMasterStack.so: $(OBJS) $(USER_OBJS)
+libModbusclient.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Linker'
-	gcc -std=c11 -L../$(PROJECT_DIR)/lib -fPIC -pthread -z noexecstack -z relro -z now -shared -o "libModbusMasterStack.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: Cross GCC Linker'
+	aarch64-tdx-linux-g++  -fstack-protector-strong  -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Werror=format-security --sysroot=/opt/tdx-xwayland/5.7.0/sysroots/aarch64-tdx-linux -L"/home/aditya/usbmsd/Modbusclient/sharedlib" -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed -fstack-protector-strong -Wl,-z,relro,-z,now -shared -o "libModbusclient.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(LIBRARIES)$(OBJS)$(C_DEPS) libModbusMasterStack.so
+	-$(RM) $(LIBRARIES)$(OBJS)$(C_DEPS) libModbusclient.so
 	-@echo ' '
 
 .PHONY: all clean dependents

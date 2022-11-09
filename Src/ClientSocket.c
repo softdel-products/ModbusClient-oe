@@ -42,7 +42,7 @@
 
 #include "SessionControl.h"
 #include "osalLinux.h"
-
+#include "gpio_service.h"		//Add for NHP board to togle Dir Pin
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -1001,6 +1001,9 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 	uint16_t numToRead = 0;
 	int iBlockingReadResult = 0;
 
+	//Add for NHP board to togle Dir Pin
+	SetValuveDirPin(DirCtrlPin, GPIO_LOW);
+	usleep(100);
 	if(NULL == pstMBusRequesPacket)
 	{
 		u8ReturnType = STACK_ERROR_SEND_FAILED;
@@ -1011,7 +1014,6 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 	memcpy_s(recvBuff,sizeof(pstMBusRequesPacket->m_stMbusTxData.m_au8DataFields),
 			pstMBusRequesPacket->m_stMbusTxData.m_au8DataFields,
 			pstMBusRequesPacket->m_stMbusTxData.m_u16Length);
-
 	{
 		crc = crc16(recvBuff,pstMBusRequesPacket->m_stMbusTxData.m_u16Length);
 
@@ -1030,7 +1032,10 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 			pstMBusRequesPacket->m_u8CommandStatus = u8ReturnType;
 			return u8ReturnType;
 		}
-
+		//Add for NHP board to togle Dir Pin
+		usleep(rtuConnectionData.onebyte_time * pstMBusRequesPacket->m_stMbusTxData.m_u16Length + 100);
+		SetValuveDirPin(DirCtrlPin, GPIO_HIGH);
+		usleep(100);
 		// Init req sent timestamp
 		timespec_get(&(pstMBusRequesPacket->m_objTimeStamps.tsReqSent), TIME_UTC);
 
@@ -1066,10 +1071,9 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		
 		// 1. Read 3 bytes: slave id (1) + function code (1) + length or exception code (1)
 		numToRead = 3;
-
 		bytes = 0;
 		// Creating exception flag and setting it to false to check for to handle the msg with exception
-		bool expFlag = false;
+//		bool expFlag = false;
 
 		int enStep = 1;
 		while(numToRead > 0){
@@ -1093,7 +1097,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 					{
 						// Read CRC byets
 						numToRead = 2;
-						expFlag = true;
+//						expFlag = true;
 						enStep = 2;
 					}
 					else
@@ -1195,7 +1199,8 @@ MODBUS_STACK_EXPORT int initSerialPort(stRTUConnectionData_t* pstRTUConnectionDa
 	
 	// set the attributes
 	tcgetattr(pstRTUConnectionData->m_fd, &tios);
-
+	//Add for NHP board to togle Dir Pin
+	pstRTUConnectionData->onebyte_time = 1000000 * (1 + 8 + (parity == 'N' ? 0 : 1) + 1) / baudrate;
 	// set the interframe delay as per baudrate
 	switch (baudrate) {
 	case 110:
@@ -1557,7 +1562,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 			if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 			{
 				u8ReturnType = STACK_ERROR_SOCKET_FAILED;
-				//printf("Socket creation failed !! error ::%d\n", errno);
+				printf("Socket creation failed !! error ::%d\n", errno);
 				break;
 			}
 
@@ -1592,21 +1597,21 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 				if (errno == EINPROGRESS)
 				{
 					a_pstIPConnect->m_lastConnectStatus = SOCK_CONNECT_INPROGRESS;
-					//printf("\nConnection with Modbus Server is in progress ...\n");
+					printf("\nConnection with Modbus Server is in progress ...\n");
 				}
 				else
 				{
 					u8ReturnType = STACK_ERROR_CONNECT_FAILED;
 					// closing socket on error.
 					Mark_Sock_Fail(a_pstIPConnect);
-					//printf("Connection with Modbus slave failed, so closing socket descriptor %d\n", sockfd);
+					printf("Connection with Modbus slave failed, so closing socket descriptor %d\n", sockfd);
 					break;
 				}
 			}
 			else if(res == 0)
 			{
 				a_pstIPConnect->m_lastConnectStatus = SOCK_CONNECT_SUCCESS;
-				//printf("Modbus slave connection established on socket %d\n", sockfd);
+				printf("Modbus slave connection established on socket %d\n", sockfd);
 				//socket has been created and connected successfully, add it to epoll fd
 
 				int res = send(sockfd, recvBuff, (pstMBusRequesPacket->m_stMbusTxData.m_u16Length), MSG_NOSIGNAL);
@@ -1614,7 +1619,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 				if(res < 0)
 				//in order to avoid application stop whenever SIGPIPE gets generated,used send function with MSG_NOSIGNAL argument
 				{
-					//printf("1. Closing socket %d as error occurred while sending data\n", sockfd);
+					printf("1. Closing socket %d as error occurred while sending data\n", sockfd);
 					u8ReturnType = STACK_ERROR_SEND_FAILED;
 					Mark_Sock_Fail(a_pstIPConnect);
 					break;
@@ -1628,7 +1633,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 			a_pstIPConnect->m_retryCount++;
 			if(a_pstIPConnect->m_retryCount > MAX_RETRY_COUNT)
 			{
-				//printf("Connect status INPROGRESS. Max retries done %d\n", a_pstIPConnect->m_sockfd);
+				printf("Connect status INPROGRESS. Max retries done %d\n", a_pstIPConnect->m_sockfd);
 				Mark_Sock_Fail(a_pstIPConnect);
 				//bReturnVal = false;
 				u8ReturnType = STACK_ERROR_CONNECT_FAILED;
@@ -1648,7 +1653,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 				getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon);
 				if (valopt)
 				{
-					//printf("getsockopt failed : %d", valopt);
+					printf("getsockopt failed : %d", valopt);
 					u8ReturnType = STACK_ERROR_CONNECT_FAILED;
 					Mark_Sock_Fail(a_pstIPConnect);
 					break;
@@ -1660,7 +1665,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 			}
 			else if(r1 <= 0)
 			{
-				//printf("select failed : %d", errno);
+				printf("select failed : %d", errno);
 				u8ReturnType = STACK_ERROR_CONNECT_FAILED;
 				Mark_Sock_Fail(a_pstIPConnect);
 				break;
@@ -1690,7 +1695,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Conne
 		// in order to avoid application stop whenever SIGPIPE gets generated,used send function with MSG_NOSIGNAL argument
 		if(res < 0)
 		{
-			//printf("Error %d occurred while sending request on %d closing the socket\n", errno, sockfd);
+			printf("Error %d occurred while sending request on %d closing the socket\n", errno, sockfd);
 			u8ReturnType = STACK_ERROR_SEND_FAILED;
 			Mark_Sock_Fail(a_pstIPConnect);
 			break;

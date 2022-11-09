@@ -1,5 +1,5 @@
-Src/osalLinux.o: ../Src/osalLinux.c ..//Inc/osalLinux.h ..//Inc/API.h
+src/osalLinux.o: ../src/osalLinux.c ../src/osalLinux.h ../src/API.h
 
-..//Inc/osalLinux.h:
+../src/osalLinux.h:
 
-..//Inc/API.h:
+../src/API.h:

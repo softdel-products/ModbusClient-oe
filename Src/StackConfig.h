@@ -281,6 +281,7 @@ typedef struct RTUConnectionData
 {
 	int m_fd;				//	function descriptor
 	long m_interframeDelay;	// Interframe delay
+	int onebyte_time;		//Add for NHP board to togle Dir Pin
 }stRTUConnectionData_t;
 
 typedef enum ThreadScheduler
