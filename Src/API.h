@@ -128,7 +128,7 @@ typedef enum
 
 typedef enum
 {
-	eOne,
+	eOne = 1,
 	eTwo
 }eStopBits;
 
