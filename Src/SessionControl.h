@@ -127,6 +127,7 @@ typedef struct LiveSerSessionList
 	uint8_t m_portName[256];			// Port name
 	uint32_t m_baudrate;				//baudrate
 	eParity m_parity;					// parity select
+	eStopBits m_stopbits;
 	long m_lInterframeDelay;			// Interframe delay
 	long m_lrespTimeout;				// response timeout
 #endif
