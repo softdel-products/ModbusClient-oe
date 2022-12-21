@@ -812,11 +812,13 @@ void* SessionControlThread(void* threadArg)
 				int ret = initSerialPort(&stRTUConnectionData,
 								pstLivSerSesslist.m_portName,
 								pstLivSerSesslist.m_baudrate,
-								pstLivSerSesslist.m_parity);
+								pstLivSerSesslist.m_parity,
+								pstLivSerSesslist.m_stopbits);
+
 				if(-1 == ret)
 				{
 					stRTUConnectionData.m_fd = -1;
-					pstMBusReqPact->m_u8ProcessReturn = STACK_ERROR_SERIAL_PORT_ERROR;
+					pstMBusReqPact->m_u8ProcessReturn = MBUS_STACK_ERROR_SERIAL_PORT_ERROR;
 					printf("Failed to initialize serial port for RTU. File descriptor is set to :: %d\n",stRTUConnectionData.m_fd);
 					addToRespQ(pstMBusReqPact);
 					continue;
@@ -826,7 +828,7 @@ void* SessionControlThread(void* threadArg)
 					pstLivSerSesslist.m_lInterframeDelay, pstLivSerSesslist.m_lrespTimeout);
 
 			pstMBusReqPact->m_u8ProcessReturn = u8ReturnType;
-			if(STACK_NO_ERROR == u8ReturnType)
+			if(MBUS_STACK_NO_ERROR == u8ReturnType)
 			{
 				//pstMBusReqPact->m_state = RESP_RCVD_FROM_NETWORK;
 			}
@@ -1222,7 +1224,7 @@ void* timeoutActionThread(void* threadArg)
 			if(true ==
 					atomic_compare_exchange_strong(&pstCur->m_state, &expected, RESP_TIMEDOUT))
 			{
-				pstCur->m_u8ProcessReturn = STACK_ERROR_RECV_TIMEOUT;
+				pstCur->m_u8ProcessReturn = MBUS_STACK_ERROR_RECV_TIMEOUT;
 				pstCur->m_stMbusRxData.m_u8Length = 0;
 				// Init resp received timestamp
 				timespec_get(&(pstCur->m_objTimeStamps.tsRespRcvd), TIME_UTC);
@@ -1620,7 +1622,7 @@ void* ServerSessTcpAndCbThread(void* threadArg)
 				//send the valid modbus packet to slave device
 				u8ReturnType = Modbus_SendPacket(pstMBusRequesPacket, &stIPConnect);
 				pstMBusRequesPacket->m_u8ProcessReturn = u8ReturnType;
-				if(STACK_NO_ERROR == u8ReturnType)
+				if(MBUS_STACK_NO_ERROR == u8ReturnType)
 				{
 					pstMBusRequesPacket->m_state = REQ_SENT_ON_NETWORK;
 				}
