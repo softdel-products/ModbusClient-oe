@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/epoll.h> // for epoll_create1(), epoll_ctl(), struct epoll_event
+#include "errorcode.h"
 
 #define handle_error_en(en, msg) do { errno = en; perror(msg); } while (0)
 
@@ -488,7 +489,7 @@ typedef enum
  *
  */
 void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,
-		eStackErrorCode eMbusStackErr);
+		ERRORCODE eMbusStackErr);
 
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 
@@ -525,12 +526,12 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
  *@param a_lInterframeDelay		[in] interframe delay apart from standard baudrate
  *@param a_lRespTimeout			[in] response timeout used in case of request timeout
  *
- * @return uint8_t 			[out] STACK_NO_ERROR in case of success;
- * 								  STACK_ERROR_SEND_FAILED if function fails to send the request
+ * @return uint8_t 			[out] MBUS_STACK_NO_ERROR in case of success;
+ * 								  MBUS_STACK_ERROR_SEND_FAILED if function fails to send the request
  * 								  to Modbus slave device
- * 								  STACK_ERROR_RECV_TIMEOUT if select() fails to notify of incoming
+ * 								  MBUS_STACK_ERROR_RECV_TIMEOUT if select() fails to notify of incoming
  * 								  response
- *								  STACK_ERROR_RECV_FAILED in case if function fails to read
+ *								  MBUS_STACK_ERROR_RECV_FAILED in case if function fails to read
  *								  data from socket descriptor
  *
  */
