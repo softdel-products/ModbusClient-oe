@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "errorcode.h"
+#include "ERRORCODE.h"
 
 #define MODBUS_STACK_EXPORT __attribute__ ((visibility ("default")))
 #define MODBUS_STACK_IMPORT __attribute__ ((visibility ("default")))

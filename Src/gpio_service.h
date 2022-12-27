@@ -59,6 +59,7 @@ typedef enum{
 char DirCtrlPin[3];
 GPIO_EXPORT eRETURN_STATUS SetGPIODirection(char *gpioPin, char *value);
 GPIO_EXPORT eRETURN_STATUS ReadGPIO(char *gpioPin, char *value);
+GPIO_EXPORT eRETURN_STATUS SetValuveDirPin(char *gpio, eRETURN_STATUS eGPIO_STATE);
 
 
 #endif /* LED_BOOTSWITCH_SERVICE_H_ */

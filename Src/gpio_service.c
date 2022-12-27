@@ -41,6 +41,7 @@
 #include "gpio_service.h"
 #include <string.h>
 #include <stdlib.h>
+#include "ERRORCODE.h"
 
 static eRETURN_STATUS ExportGPIO(char *gpioPin)
 {

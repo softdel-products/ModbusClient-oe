@@ -43,7 +43,7 @@
 #include "SessionControl.h"
 #include "osalLinux.h"
 #include "gpio_service.h"		//Add for NHP board to togle Dir Pin
-#include "errorcode.h"
+#include "ERRORCODE.h"
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 #include <sys/socket.h>
 #include <sys/types.h>

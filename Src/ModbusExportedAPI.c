@@ -30,7 +30,7 @@
 #include <safe_lib.h>
 #include <unistd.h>
 #include <time.h>
-#include "errorcode.h"
+#include "ERRORCODE.h"
 #include "gpio_service.h"	//Add for NHP board to togle Dir Pin
 
 #define UART2 "/dev/apalis-uart2"

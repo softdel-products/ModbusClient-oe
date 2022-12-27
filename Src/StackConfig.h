@@ -35,7 +35,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/epoll.h> // for epoll_create1(), epoll_ctl(), struct epoll_event
-#include "errorcode.h"
+#include "ERRORCODE.h"
 
 #define handle_error_en(en, msg) do { errno = en; perror(msg); } while (0)
 
