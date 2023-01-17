@@ -539,11 +539,11 @@ void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,ERR
  * 						 MBUS_STACK_ERROR_MALLOC_FAILED in case of error
  *
  */
-uint8_t DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
+ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 		uint16_t u16BuffInex,
 		stMbusPacketVariables_t *pstMBusRequesPacket)
 {
-	uint8_t u8ReturnType = MBUS_STACK_NO_ERROR;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	uint16_t u16TempBuffInex = 0;
 	uint8_t u8Count = 0;
 	stEndianess_t stEndianess = { 0 };
@@ -877,9 +877,9 @@ uint8_t DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
  *
  *
  */
-uint8_t DecodeRxPacket(uint8_t *ServerReplyBuff,stMbusPacketVariables_t *pstMBusRequesPacket)
+ERRORCODE DecodeRxPacket(uint8_t *ServerReplyBuff,stMbusPacketVariables_t *pstMBusRequesPacket)
 {
-	uint8_t u8ReturnType = MBUS_STACK_NO_ERROR;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	uint16_t u16BuffInex = 0;
 
 #ifdef MODBUS_STACK_TCPIP_ENABLED
@@ -1005,12 +1005,12 @@ int checkforblockingread(int fd, long a_lRespTimeout)
  *								  data from socket descriptor
  *
  */
-uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		stRTUConnectionData_t rtuConnectionData,
 		long a_lInterframeDelay,
 		long a_lRespTimeout)
 {
-	uint8_t u8ReturnType = MBUS_STACK_NO_ERROR;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	uint8_t recvBuff[TCP_MODBUS_ADU_LENGTH];
 	volatile int bytes = 0;
 	uint16_t crc;
@@ -1021,7 +1021,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 
 #ifdef MODBUS_CLIENT_STACK_RUN_ON_BOARD
 	//Add for NHP board to togle Dir Pin
-	SetValuveDirPin(DirCtrlPin, GPIO_LOW);
+	SetValuveDirPin(DirCtrlPin, MBUS_GPIO_LOW);
 #endif
 	usleep(100);
 	if(NULL == pstMBusRequesPacket)
@@ -1055,7 +1055,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		//Add for NHP board to togle Dir Pin
 		usleep(rtuConnectionData.onebyte_time * pstMBusRequesPacket->m_stMbusTxData.m_u16Length + 100);
 #ifdef MODBUS_CLIENT_STACK_RUN_ON_BOARD
-		SetValuveDirPin(DirCtrlPin, GPIO_HIGH);
+		SetValuveDirPin(DirCtrlPin, MBUS_GPIO_HIGH);
 #endif
 		usleep(100);
 		// Init req sent timestamp
@@ -1558,11 +1558,11 @@ void Mark_Sock_Fail(IP_Connect_t *a_pstIPConnect)
  *								  in request manager's list
  *
  */
-uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Connect_t *a_pstIPConnect)
+ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Connect_t *a_pstIPConnect)
 {
 	//local variables
 	int32_t sockfd = 0;
-	uint8_t u8ReturnType = MBUS_STACK_NO_ERROR;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	uint8_t recvBuff[260];
 	long arg;
 	int res = 0;

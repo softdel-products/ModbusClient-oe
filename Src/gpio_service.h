@@ -44,7 +44,8 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include "ERRORCODE.h"
+/*
 typedef enum{
 	//NO_ERROR,
 	//ERROR_INVALID_FD,
@@ -56,10 +57,11 @@ typedef enum{
 	INAVLID_GPIO_STATE,
 	//FAILED
 }eRETURN_STATUS;
+*/
 char DirCtrlPin[3];
-GPIO_EXPORT eRETURN_STATUS SetGPIODirection(char *gpioPin, char *value);
-GPIO_EXPORT eRETURN_STATUS ReadGPIO(char *gpioPin, char *value);
-GPIO_EXPORT eRETURN_STATUS SetValuveDirPin(char *gpio, eRETURN_STATUS eGPIO_STATE);
+GPIO_EXPORT ERRORCODE SetGPIODirection(char *gpioPin, char *value);
+GPIO_EXPORT ERRORCODE ReadGPIO(char *gpioPin, char *value);
+GPIO_EXPORT ERRORCODE SetValuveDirPin(char *gpio, ERRORCODE eGPIO_STATE);
 
 
 #endif /* LED_BOOTSWITCH_SERVICE_H_ */

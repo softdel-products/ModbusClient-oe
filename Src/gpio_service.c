@@ -41,16 +41,15 @@
 #include "gpio_service.h"
 #include <string.h>
 #include <stdlib.h>
-#include "ERRORCODE.h"
 
-static eRETURN_STATUS ExportGPIO(char *gpioPin)
+static ERRORCODE ExportGPIO(char *gpioPin)
 {
 	int fd = -1;
 
 	/**Check input pointer */
 	if(gpioPin == NULL)
 	{
-		return ERROR_INVALID_POINTER;
+		return MBUS_ERROR_INVALID_POINTER;
 	}
 
 	/**Open GPIO file*/
@@ -65,23 +64,23 @@ static eRETURN_STATUS ExportGPIO(char *gpioPin)
 	/**export GPIO*/
 	if(write(fd, gpioPin, strlen(gpioPin)) < 0)
 	{
-		return ERROR_WRITE_GPIO;
+		return MBUS_ERROR_WRITE_GPIO;
 	}
 
 	/**Close fd*/
 	close(fd);
 
-	return NO_ERROR;
+	return SUCCESS;
 }
 
-static eRETURN_STATUS UnexportGPIO(char *gpioPin)
+static ERRORCODE UnexportGPIO(char *gpioPin)
 {
 	int fd = -1;
 
 	/**Check input pointer */
 	if(gpioPin == NULL)
 	{
-		return ERROR_INVALID_POINTER;
+		return MBUS_ERROR_INVALID_POINTER;
 	}
 
 	/**Open GPIO file*/
@@ -96,16 +95,16 @@ static eRETURN_STATUS UnexportGPIO(char *gpioPin)
 	/**unexport GPIO*/
 	if(write(fd, gpioPin, strlen(gpioPin)) < 0)
 	{
-		return ERROR_WRITE_GPIO;
+		return MBUS_ERROR_WRITE_GPIO;
 	}
 
 	/**Close fd*/
 	close(fd);
 
-	return NO_ERROR;
+	return SUCCESS;
 }
 
-eRETURN_STATUS SetGPIODirection(char *gpioPin, char *value)
+ERRORCODE SetGPIODirection(char *gpioPin, char *value)
 {
 	int fd = -1;
 	char gpio_path[100] = {0};
@@ -113,7 +112,7 @@ eRETURN_STATUS SetGPIODirection(char *gpioPin, char *value)
 	/**Check input pointer */
 	if(value == NULL || gpioPin == NULL)
 	{
-		return ERROR_INVALID_POINTER;
+		return MBUS_ERROR_INVALID_POINTER;
 	}
 
 	/**Create GPIO path*/
@@ -133,16 +132,16 @@ eRETURN_STATUS SetGPIODirection(char *gpioPin, char *value)
 	if(write(fd, value, strlen(value)) < 0)
 	{
 		printf("%s: Failed to set GPIO direction %s\n", __func__, gpioPin);
-		return ERROR_WRITE_GPIO;
+		return MBUS_ERROR_WRITE_GPIO;
 	}
 
 	/**Close fd*/
 	close(fd);
 
-	return NO_ERROR;
+	return SUCCESS;
 }
 
-eRETURN_STATUS ReadGPIO(char *gpioPin, char *value)
+ERRORCODE ReadGPIO(char *gpioPin, char *value)
 {
 	int fd = -1;
 	char gpio_path[100] = {0};
@@ -150,7 +149,7 @@ eRETURN_STATUS ReadGPIO(char *gpioPin, char *value)
 	/**Check input pointer */
 	if(value == NULL || gpioPin == NULL)
 	{
-		return ERROR_INVALID_POINTER;
+		return MBUS_ERROR_INVALID_POINTER;
 	}
 
 	/**Create GPIO path*/
@@ -170,16 +169,16 @@ eRETURN_STATUS ReadGPIO(char *gpioPin, char *value)
 	if(read(fd, value, 3*sizeof(char)) < 0)
 	{
 		printf("%s: Failed to write on GPIO %s\n", __func__, gpioPin);
-		return ERROR_READ_GPIO;
+		return MBUS_ERROR_READ_GPIO;
 	}
 
 	/**Close fd*/
 	close(fd);
 
-	return NO_ERROR;
+	return SUCCESS;
 }
 
-eRETURN_STATUS WriteGPIO(char *gpioPin, char *value)
+ERRORCODE WriteGPIO(char *gpioPin, char *value)
 {
 	int fd = -1;
 	char gpio_path[100] = {0};
@@ -187,7 +186,7 @@ eRETURN_STATUS WriteGPIO(char *gpioPin, char *value)
 	/**Check input pointer */
 	if(value == NULL || gpioPin == NULL)
 	{
-		return ERROR_INVALID_POINTER;
+		return MBUS_ERROR_INVALID_POINTER;
 	}
 
 	/**Create GPIO path*/
@@ -207,29 +206,29 @@ eRETURN_STATUS WriteGPIO(char *gpioPin, char *value)
 	if(write(fd, value, strlen(value)) < 0)
 	{
 		printf("%s: Failed to write on GPIO %s\n", __func__, gpioPin);
-		return ERROR_WRITE_GPIO;
+		return MBUS_ERROR_WRITE_GPIO;
 	}
 
 	/**Close fd*/
 	close(fd);
 
-	return NO_ERROR;
+	return SUCCESS;
 }
 
-eRETURN_STATUS InitDirPin(char *gpio)
+ERRORCODE InitDirPin(char *gpio)
 {
-	eRETURN_STATUS ret_val = NO_ERROR;
+	ERRORCODE ret_val = SUCCESS;
 	char value[3]= {0};
 
 	/**Unexport respective GPIO*/
 	UnexportGPIO(gpio);
 	/**Export respective GPIO*/
 	ret_val = ExportGPIO(gpio);
-	if(ret_val == NO_ERROR)
+	if(ret_val == SUCCESS)
 	{
 		/**Set respective GPIO Direction*/
 		ret_val = SetGPIODirection(gpio, "out");
-		if(ret_val == NO_ERROR)
+		if(ret_val == SUCCESS)
 		{
 
 			strncpy(value, "0", 2);
@@ -241,32 +240,32 @@ eRETURN_STATUS InitDirPin(char *gpio)
 	else
 	{
 		printf("GPIO SET Failed. = %d\n",ret_val);
-		return ERROR_WRITE_GPIO;
+		return MBUS_ERROR_WRITE_GPIO;
 	}
 
 	return ret_val;
 }
 
-eRETURN_STATUS SetValuveDirPin(char *gpio, eRETURN_STATUS eGPIO_STATE)
+ERRORCODE SetValuveDirPin(char *gpio, ERRORCODE eGPIO_STATE)
 {
-	eRETURN_STATUS ret_val = NO_ERROR;
+	ERRORCODE ret_val = SUCCESS;
 	char value[3]= {0};
 
 	/**Set respective GPIO Direction*/
 	ret_val = SetGPIODirection(gpio, "out");
-	if(ret_val == NO_ERROR)
+	if(ret_val == SUCCESS)
 	{
-		if(eGPIO_STATE == GPIO_HIGH)
+		if(eGPIO_STATE == MBUS_GPIO_HIGH)
 		{
 			strncpy(value, "1", 2);
 		}
-		else if(eGPIO_STATE == GPIO_LOW)
+		else if(eGPIO_STATE == MBUS_GPIO_LOW)
 		{
 			strncpy(value, "0", 2);
 		}
 		else
 		{
-			return INAVLID_GPIO_STATE;
+			return MBUS_INAVLID_GPIO_STATE;
 		}
 		/**Set respective GPIO Value*/
 		ret_val = WriteGPIO(gpio, value);

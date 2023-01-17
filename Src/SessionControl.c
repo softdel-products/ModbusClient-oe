@@ -793,7 +793,7 @@ void* SessionControlThread(void* threadArg)
 	Linux_Msg_t stScMsgQue = { 0 };
 	stMbusPacketVariables_t *pstMBusReqPact = NULL;
 	stRTUConnectionData_t stRTUConnectionData = {};
-	uint8_t u8ReturnType = 0;
+	ERRORCODE u8ReturnType = 0;
 	stLiveSerSessionList_t pstLivSerSesslist;
 
 	pstLivSerSesslist = *((stLiveSerSessionList_t *)threadArg);

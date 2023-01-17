@@ -608,7 +608,7 @@ uint8_t CreateHeaderForDevIdentificationModbusRequest(uint8_t u8UnitId,
  *									  MBUS_STACK_NO_ERROR in case of all parameters are valid
  *
  */
-uint8_t InputParameterVerification(uint16_t u16StartCoilOrReg, uint16_t u16NumberOfcoilsOrReg,
+ERRORCODE InputParameterVerification(uint16_t u16StartCoilOrReg, uint16_t u16NumberOfcoilsOrReg,
 		uint8_t u8UnitID, void* pFunCallBack, uint8_t u8FunctionCode, uint8_t u8ByteCount)
 {
 	//check for null pointer
@@ -1895,7 +1895,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 													 int32_t i32Ctx,
 													 void* pFunCallBack)
 {
-	uint8_t	u8ReturnType = MBUS_STACK_NO_ERROR;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t	u8TempCount = 0;
 	stEndianess_t stEndianess = { 0 };
@@ -2037,7 +2037,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 } // End of Modbus_Write_File_Record
 
 /**
- * @fn MODBUS_STACK_EXPORT uint8_t Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
+ * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
 									uint8_t u8FunCode,
 									uint16_t u16NoOfReadReg,
 									uint16_t u16WriteRegAddress,
@@ -2466,7 +2466,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 			memcpy_s((void*)DirCtrlPin,(rsize_t) sizeof(DirCtrlPin),(void*)"435",(rsize_t) strlen("435"));
 		}
 		InitDirPin(DirCtrlPin);
-		SetValuveDirPin(DirCtrlPin, GPIO_LOW);
+		SetValuveDirPin(DirCtrlPin, MBUS_GPIO_LOW);
 	#endif
 
 #endif

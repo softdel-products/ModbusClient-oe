@@ -67,7 +67,7 @@
 	#define TCP_MODBUS_ADU_LENGTH 256
 
 	// Modbus serial data statndard length
-	#define MODBUS_DATA_LENGTH (256)
+//	#define MODBUS_DATA_LENGTH (256)
 
 	// RTU packet header length
 	#define PKT_HDR_LEN 5
@@ -234,7 +234,7 @@ typedef struct _stMbusPacketVariables
 	// Holds the unit id
 	uint8_t  m_u8UnitID;
 	_Atomic eTransactionState m_state;
-	uint8_t  m_u8ProcessReturn;
+	ERRORCODE  m_u8ProcessReturn;
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 	// Holds Ip address of salve/server device
 	uint8_t m_u8IpAddr[4];
@@ -503,7 +503,7 @@ void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,
  * @return uint8_t [out] respective error codes
  *
  */
-uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		IP_Connect_t *m_pstIPConnect);
 #else
 /**
@@ -535,7 +535,7 @@ uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
  *								  data from socket descriptor
  *
  */
-uint8_t Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		stRTUConnectionData_t rtuConnectionData,
 		long a_lInterframeDelay,
 		long a_lRespTimeout);
