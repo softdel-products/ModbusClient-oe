@@ -567,16 +567,17 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 	{
         #ifndef MODBUS_STACK_TCPIP_ENABLED
 			nTmpDataLength  = ServerReplyBuff[u16BuffInex];
-			nRcvdCRC        = ServerReplyBuff[nTmpDataLength + 3]; // LSB Byte of Rcvd CRC
-			nRcvdCRC       |= (uint16_t)ServerReplyBuff[nTmpDataLength + 3 + 1] << 8;
+			nRcvdCRC        = ServerReplyBuff[nTmpDataLength + 3 + 1 ]; // LSB Byte of Rcvd CRC
+			nRcvdCRC       |= (uint16_t)ServerReplyBuff[nTmpDataLength + 3] << 8;
 			nCalculatedCRC  = crc16(ServerReplyBuff, (nTmpDataLength + 3));
-
-			if(nCalculatedCRC == nRcvdCRC)
+			//printf("Calculated CRC= %d Received CRC= %d \r\n", nCalculatedCRC, nRcvdCRC);
+			if(nCalculatedCRC != nRcvdCRC)
 			{
 				u8ReturnType = MBUS_STACK_ERROR_MAX;
 					return u8ReturnType;
 			}
 		#endif
+
 		switch(eMbusFunctionCode)
 		{
 			default:

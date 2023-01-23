@@ -1573,7 +1573,7 @@ void* ServerSessTcpAndCbThread(void* threadArg)
 {
 
 	Linux_Msg_t stScMsgQue = { 0 };
-	uint8_t u8ReturnType = 0;
+	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
 	stMbusPacketVariables_t *pstMBusRequesPacket = NULL;
 	int32_t i32MsgQueIdSSTC = 0;
 	int32_t i32RetVal = 0;
