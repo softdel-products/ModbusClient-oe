@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "ERRORCODE.h"
+#include "Common.h"
 
 #define MODBUS_STACK_EXPORT __attribute__ ((visibility ("default")))
 #define MODBUS_STACK_IMPORT __attribute__ ((visibility ("default")))
@@ -270,19 +270,19 @@ typedef struct TimeStamps
 }stTimeStamps;
 
 // Modbus master stack initialization function
-MODBUS_STACK_EXPORT ERRORCODE AppMbusMaster_StackInit();
+MODBUS_STACK_EXPORT t_Status AppMbusMaster_StackInit();
 
 // Modbus master stack de-initialization function
 MODBUS_STACK_EXPORT void AppMbusMaster_StackDeInit(void);
 
 // Modbus master stack configuration function
-MODBUS_STACK_EXPORT ERRORCODE AppMbusMaster_SetStackConfigParam(stDevConfig_t *pstDevConf);
+MODBUS_STACK_EXPORT t_Status AppMbusMaster_SetStackConfigParam(stDevConfig_t *pstDevConf);
 
 // Modbus master stack configuration function
 MODBUS_STACK_EXPORT stDevConfig_t* AppMbusMaster_GetStackConfigParam();
 
 // Read coil API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Coils(uint16_t u16StartCoil,
 											  uint16_t u16NumOfcoils,
 											  uint16_t u16TransacID,
 											  uint8_t u8UnitId,
@@ -291,7 +291,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 											  void* pFunCallBack);
 
 // Read discrete input API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 														uint16_t u16NumOfDI,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -300,7 +300,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 														void* pFunCallBack);
 
 // Read holding register API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Holding_Registers(uint16_t u16StartReg,
 														  uint16_t u16NumberOfRegisters,
 														  uint16_t u16TransacID,
 														  uint8_t u8UnitId,
@@ -309,7 +309,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 														  void* pFunCallBack);
 
 // Read input register API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Input_Registers(uint16_t u16StartReg,
 													    uint16_t u16NumberOfRegisters,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -318,7 +318,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 														void* pFunCallBack);
 
 // write single coil API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 													 uint16_t u16OutputVal,
 													 uint16_t u16TransacID,
 													 uint8_t u8UnitId,
@@ -327,7 +327,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 													 void* pFunCallBack);
 
 // write single register API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Register(uint16_t u16StartReg,
 														 uint16_t u16RegOutputVal,
 														 uint16_t u16TransacID,
 														 uint8_t u8UnitId,
@@ -336,7 +336,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 														 void* pFunCallBack);
 
 // write multiple coils API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 													   uint16_t u16NumOfCoil,
 													   uint16_t u16TransacID,
 													   uint8_t  *pu8OutputVal,
@@ -346,7 +346,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 													   void*    pFunCallBack);
 
 // write multiple registers API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Register(uint16_t u16StartReg,
 									   	   	   	   	   	   uint16_t u16NumOfReg,
 														   uint16_t u16TransacID,
 														   uint8_t  *pu8OutputVal,
@@ -356,7 +356,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 														   void*    pFunCallBack);
 
 // read file record API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_File_Record(uint8_t u8byteCount,
 													uint8_t u8FunCode,
 													stMbusReadFileRecord_t *pstFileRecord,
 													uint16_t u16TransacID,
@@ -366,7 +366,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 													void* pFunCallBack);
 
 // write file record API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 		 	 	 	 	 	 	 	 	 	 	 	uint8_t u8FunCode,
 													stWrFileSubReq_t *pstFileRecord,
 													uint16_t u16TransacID,
@@ -376,7 +376,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 													void* pFunCallBack);
 
 // read write multiple registers API
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
 									uint8_t u8FunCode,
 									uint16_t u16NoOfReadReg,
 									uint16_t u16WriteRegAddress,
@@ -389,7 +389,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 									void* pFunCallBack);
 
 // Read device identification
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEIType,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Device_Identification(uint8_t u8MEIType,
 		uint8_t u8FunCode,
 		uint8_t u8ReadDevIdCode,
 		uint8_t u8ObjectId,
@@ -454,10 +454,10 @@ typedef struct CtxInfo
 
 #ifndef MODBUS_STACK_TCPIP_ENABLED
 // RTU context
-MODBUS_STACK_EXPORT ERRORCODE getRTUCtx(int32_t *rtuCtx, stCtxInfo *pCtxInfo);
+MODBUS_STACK_EXPORT t_Status getRTUCtx(int32_t *rtuCtx, stCtxInfo *pCtxInfo);
 #else
 // TCP context
-MODBUS_STACK_EXPORT ERRORCODE getTCPCtx(int *tcpCtx, stCtxInfo *pCtxInfo);
+MODBUS_STACK_EXPORT t_Status getTCPCtx(int *tcpCtx, stCtxInfo *pCtxInfo);
 #endif
 
 // Remove the context

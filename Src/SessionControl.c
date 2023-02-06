@@ -793,7 +793,7 @@ void* SessionControlThread(void* threadArg)
 	Linux_Msg_t stScMsgQue = { 0 };
 	stMbusPacketVariables_t *pstMBusReqPact = NULL;
 	stRTUConnectionData_t stRTUConnectionData = {};
-	ERRORCODE u8ReturnType = 0;
+	t_Status u8ReturnType = 0;
 	stLiveSerSessionList_t pstLivSerSesslist;
 
 	pstLivSerSesslist = *((stLiveSerSessionList_t *)threadArg);
@@ -828,7 +828,7 @@ void* SessionControlThread(void* threadArg)
 					pstLivSerSesslist.m_lInterframeDelay, pstLivSerSesslist.m_lrespTimeout);
 
 			pstMBusReqPact->m_u8ProcessReturn = u8ReturnType;
-			if(MBUS_STACK_NO_ERROR == u8ReturnType)
+			if(STS_MBUS_STACK_NO_ERROR == u8ReturnType)
 			{
 				//pstMBusReqPact->m_state = RESP_RCVD_FROM_NETWORK;
 			}
@@ -1573,7 +1573,7 @@ void* ServerSessTcpAndCbThread(void* threadArg)
 {
 
 	Linux_Msg_t stScMsgQue = { 0 };
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	stMbusPacketVariables_t *pstMBusRequesPacket = NULL;
 	int32_t i32MsgQueIdSSTC = 0;
 	int32_t i32RetVal = 0;
@@ -1622,7 +1622,7 @@ void* ServerSessTcpAndCbThread(void* threadArg)
 				//send the valid modbus packet to slave device
 				u8ReturnType = Modbus_SendPacket(pstMBusRequesPacket, &stIPConnect);
 				pstMBusRequesPacket->m_u8ProcessReturn = u8ReturnType;
-				if(MBUS_STACK_NO_ERROR == u8ReturnType)
+				if(STS_MBUS_STACK_NO_ERROR == u8ReturnType)
 				{
 					pstMBusRequesPacket->m_state = REQ_SENT_ON_NETWORK;
 				}

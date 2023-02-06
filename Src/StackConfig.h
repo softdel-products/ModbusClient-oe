@@ -35,7 +35,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/epoll.h> // for epoll_create1(), epoll_ctl(), struct epoll_event
-#include "ERRORCODE.h"
+#include "Common.h"
 
 #define handle_error_en(en, msg) do { errno = en; perror(msg); } while (0)
 
@@ -234,7 +234,7 @@ typedef struct _stMbusPacketVariables
 	// Holds the unit id
 	uint8_t  m_u8UnitID;
 	_Atomic eTransactionState m_state;
-	ERRORCODE  m_u8ProcessReturn;
+	t_Status  m_u8ProcessReturn;
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 	// Holds Ip address of salve/server device
 	uint8_t m_u8IpAddr[4];
@@ -489,7 +489,7 @@ typedef enum
  *
  */
 void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,
-		ERRORCODE eMbusStackErr);
+		t_Status eMbusStackErr);
 
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 
@@ -503,7 +503,7 @@ void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,
  * @return uint8_t [out] respective error codes
  *
  */
-ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		IP_Connect_t *m_pstIPConnect);
 #else
 /**
@@ -535,7 +535,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
  *								  data from socket descriptor
  *
  */
-ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		stRTUConnectionData_t rtuConnectionData,
 		long a_lInterframeDelay,
 		long a_lRespTimeout);

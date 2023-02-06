@@ -86,7 +86,7 @@ void* SessionControlThread(void* threadArg);
  * @return uint8_t [out] respective error codes
  *
  */
-ERRORCODE DecodeRxPacket(uint8_t *ServerReplyBuff,
+t_Status DecodeRxPacket(uint8_t *ServerReplyBuff,
 		stMbusPacketVariables_t *pstMBusRequesPacket);
 
 /**

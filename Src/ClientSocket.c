@@ -43,7 +43,7 @@
 #include "SessionControl.h"
 #include "osalLinux.h"
 #include "gpio_service.h"		//Add for NHP board to togle Dir Pin
-#include "ERRORCODE.h"
+#include "Common.h"
 #ifdef MODBUS_STACK_TCPIP_ENABLED
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -275,7 +275,7 @@ int sleep_micros(long lMicroseconds)
  *
  * @return none
  */
-void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,ERRORCODE eMbusStackErr)
+void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,t_Status eMbusStackErr)
 {
 	stException_t  stException = {0};
 
@@ -294,7 +294,7 @@ void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,ERR
 		pstMBusRequesPacket->m_stMbusRxData.m_u8Length = 0;
 		pstMBusRequesPacket->m_u8FunctionCode = (pstMBusRequesPacket->m_u8FunctionCode & (0x7F));
 	}
-	else if(MBUS_STACK_NO_ERROR != eMbusStackErr)
+	else if(STS_MBUS_STACK_NO_ERROR != eMbusStackErr)
 	{
 		stException.m_u8ExcStatus = MODBUS_STACK_ERROR;
 		stException.m_u8ExcCode = eMbusStackErr;
@@ -539,11 +539,11 @@ void ApplicationCallBackHandler(stMbusPacketVariables_t *pstMBusRequesPacket,ERR
  * 						 MBUS_STACK_ERROR_MALLOC_FAILED in case of error
  *
  */
-ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
+t_Status DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 		uint16_t u16BuffInex,
 		stMbusPacketVariables_t *pstMBusRequesPacket)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16TempBuffInex = 0;
 	uint8_t u8Count = 0;
 	stEndianess_t stEndianess = { 0 };
@@ -577,7 +577,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 				//printf("Calculated CRC= %d Received CRC= %d \r\n", nCalculatedCRC, nRcvdCRC);
 				if(nCalculatedCRC != nRcvdCRC)
 				{
-					u8ReturnType = MBUS_STACK_ERROR_MAX;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_MAX;
 						return u8ReturnType;
 				}
 		    }
@@ -652,7 +652,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 				pstMbusRdFileRecdResp = OSAL_Malloc(sizeof(stMbusRdFileRecdResp_t));
 				if(NULL == pstMbusRdFileRecdResp)
 				{
-					u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+					u8ReturnType = STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 					return u8ReturnType;
 				}
 				pstMBusRequesPacket->m_stMbusRxData.m_pvAdditionalData = pstMbusRdFileRecdResp;
@@ -672,7 +672,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 					pu16RecData = OSAL_Malloc(pstSubReq->m_u8FileRespLen-1);
 					if(NULL == pu16RecData)
 					{
-						u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+						u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 						return u8ReturnType;
 					}
 					pstSubReq->m_pu16RecData = pu16RecData;
@@ -689,7 +689,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 						pstSubReq->pstNextNode = OSAL_Malloc(sizeof(stRdFileSubReq_t));
 						if(NULL == pstSubReq->pstNextNode)
 						{
-							u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+							u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 							return u8ReturnType;
 						}
 						pstSubReq = pstSubReq->pstNextNode;
@@ -713,7 +713,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 				pstMbusWrFileRecdResp = OSAL_Malloc(sizeof(stMbusWrFileRecdResp_t));
 				if(NULL == pstMbusWrFileRecdResp )
 				{
-					u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 					return u8ReturnType;
 				}
 				// Initialize allocated memory with zero
@@ -746,7 +746,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 					pu16RecData = OSAL_Malloc(pstSubReq->m_u16RecLen*sizeof(uint16_t));
 					if(NULL == pu16RecData)
 					{
-						u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+						u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 						return u8ReturnType;
 					}
 					pstSubReq->m_pu16RecData = pu16RecData;
@@ -765,7 +765,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 						pstSubReq->pstNextNode = OSAL_Malloc(sizeof(stWrFileSubReq_t));
 						if(NULL == pstSubReq->pstNextNode)
 						{
-							u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+							u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 							return u8ReturnType;
 						}
 						pstSubReq = pstSubReq->pstNextNode;
@@ -790,7 +790,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 				pstMbusRdDevIdResp = OSAL_Malloc(sizeof(stRdDevIdResp_t));
 				if(NULL == pstMbusRdDevIdResp)
 				{
-					u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 					return u8ReturnType;
 				}
 				// Initialize allocated memory with 0
@@ -814,7 +814,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 					pstObjList->m_u8ObjectValue = OSAL_Malloc(sizeof(uint8_t) * pstObjList->m_u8ObjectLen);
 					if(NULL == pstObjList->m_u8ObjectValue)
 					{
-						u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+						u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 						return u8ReturnType;
 					}
 					memcpy_s(pstObjList->m_u8ObjectValue,
@@ -846,7 +846,7 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
 						pstObjList->pstNextNode = OSAL_Malloc(sizeof(SubObjList_t));
 						if(NULL == pstObjList->pstNextNode)
 						{
-							u8ReturnType = MBUS_STACK_ERROR_MALLOC_FAILED;
+							u8ReturnType =  STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 							return u8ReturnType;
 						}
 						pstObjList = pstObjList->pstNextNode;
@@ -884,9 +884,9 @@ ERRORCODE DecodeRxMBusPDU(uint8_t *ServerReplyBuff,
  *
  *
  */
-ERRORCODE DecodeRxPacket(uint8_t *ServerReplyBuff,stMbusPacketVariables_t *pstMBusRequesPacket)
+t_Status DecodeRxPacket(uint8_t *ServerReplyBuff,stMbusPacketVariables_t *pstMBusRequesPacket)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType =  STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16BuffInex = 0;
 
 #ifdef MODBUS_STACK_TCPIP_ENABLED
@@ -934,7 +934,7 @@ ERRORCODE DecodeRxPacket(uint8_t *ServerReplyBuff,stMbusPacketVariables_t *pstMB
 				||(pstMBusRequesPacket->m_u8FunctionCode != (u8FunctionCode & 0x7F)))
 #endif
 		{
-			u8ReturnType = MBUS_STACK_TXNID_OR_UNITID_MISSMATCH;
+			u8ReturnType =  STS_MBUS_STACK_TXNID_OR_UNITID_MISSMATCH;
 		}
 		else
 		{
@@ -1012,12 +1012,12 @@ int checkforblockingread(int fd, long a_lRespTimeout)
  *								  data from socket descriptor
  *
  */
-ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
+t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		stRTUConnectionData_t rtuConnectionData,
 		long a_lInterframeDelay,
 		long a_lRespTimeout)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType =  STS_MBUS_STACK_NO_ERROR;
 	uint8_t recvBuff[TCP_MODBUS_ADU_LENGTH];
 	volatile int bytes = 0;
 	uint16_t crc;
@@ -1033,7 +1033,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 	usleep(100);
 	if(NULL == pstMBusRequesPacket)
 	{
-		u8ReturnType = MBUS_STACK_ERROR_SEND_FAILED;
+		u8ReturnType =  STS_MBUS_STACK_ERROR_SEND_FAILED;
 		return u8ReturnType;
 	}
 
@@ -1055,7 +1055,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		bytes = write(rtuConnectionData.m_fd,recvBuff,(pstMBusRequesPacket->m_stMbusTxData.m_u16Length));
 		if(bytes <= 0)
 		{
-			u8ReturnType = MBUS_STACK_ERROR_SEND_FAILED;
+			u8ReturnType =  STS_MBUS_STACK_ERROR_SEND_FAILED;
 			pstMBusRequesPacket->m_u8CommandStatus = u8ReturnType;
 			return u8ReturnType;
 		}
@@ -1565,18 +1565,18 @@ void Mark_Sock_Fail(IP_Connect_t *a_pstIPConnect)
  *								  in request manager's list
  *
  */
-ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Connect_t *a_pstIPConnect)
+t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Connect_t *a_pstIPConnect)
 {
 	//local variables
 	int32_t sockfd = 0;
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType =  STS_MBUS_STACK_NO_ERROR;
 	uint8_t recvBuff[260];
 	long arg;
 	int res = 0;
 
 	if(NULL == pstMBusRequesPacket || NULL == a_pstIPConnect)
 	{
-		u8ReturnType = MBUS_STACK_ERROR_SEND_FAILED;
+		u8ReturnType =  STS_MBUS_STACK_ERROR_SEND_FAILED;
 		return u8ReturnType;
 	}
 
@@ -1600,7 +1600,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 			a_pstIPConnect->m_retryCount = 0;
 			if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 			{
-				u8ReturnType = MBUS_STACK_ERROR_SOCKET_FAILED;
+				u8ReturnType =  STS_MBUS_STACK_ERROR_SOCKET_FAILED;
 				printf("Socket creation failed !! error ::%d\n", errno);
 				break;
 			}
@@ -1640,7 +1640,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 				}
 				else
 				{
-					u8ReturnType = MBUS_STACK_ERROR_CONNECT_FAILED;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_CONNECT_FAILED;
 					// closing socket on error.
 					Mark_Sock_Fail(a_pstIPConnect);
 					printf("Connection with Modbus slave failed, so closing socket descriptor %d\n", sockfd);
@@ -1659,7 +1659,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 				//in order to avoid application stop whenever SIGPIPE gets generated,used send function with MSG_NOSIGNAL argument
 				{
 					printf("1. Closing socket %d as error occurred while sending data\n", sockfd);
-					u8ReturnType = MBUS_STACK_ERROR_SEND_FAILED;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_SEND_FAILED;
 					Mark_Sock_Fail(a_pstIPConnect);
 					break;
 				}
@@ -1675,7 +1675,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 				printf("Connect status INPROGRESS. Max retries done %d\n", a_pstIPConnect->m_sockfd);
 				Mark_Sock_Fail(a_pstIPConnect);
 				//bReturnVal = false;
-				u8ReturnType = MBUS_STACK_ERROR_CONNECT_FAILED;
+				u8ReturnType =  STS_MBUS_STACK_ERROR_CONNECT_FAILED;
 				break;
 			}
 			struct timeval tv;
@@ -1693,7 +1693,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 				if (valopt)
 				{
 					printf("getsockopt failed : %d", valopt);
-					u8ReturnType = MBUS_STACK_ERROR_CONNECT_FAILED;
+					u8ReturnType =  STS_MBUS_STACK_ERROR_CONNECT_FAILED;
 					Mark_Sock_Fail(a_pstIPConnect);
 					break;
 				}
@@ -1705,7 +1705,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 			else if(r1 <= 0)
 			{
 				printf("select failed : %d", errno);
-				u8ReturnType = MBUS_STACK_ERROR_CONNECT_FAILED;
+				u8ReturnType =  STS_MBUS_STACK_ERROR_CONNECT_FAILED;
 				Mark_Sock_Fail(a_pstIPConnect);
 				break;
 			}
@@ -1716,7 +1716,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 		{
 			if(0 > addtoEPollList(a_pstIPConnect))
 			{
-				u8ReturnType = MBUS_STACK_ERROR_SOCKET_LISTEN_FAILED;
+				u8ReturnType =  STS_MBUS_STACK_ERROR_SOCKET_LISTEN_FAILED;
 				Mark_Sock_Fail(a_pstIPConnect);
 				break;
 			}
@@ -1735,7 +1735,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 		if(res < 0)
 		{
 			printf("Error %d occurred while sending request on %d closing the socket\n", errno, sockfd);
-			u8ReturnType = MBUS_STACK_ERROR_SEND_FAILED;
+			u8ReturnType =  STS_MBUS_STACK_ERROR_SEND_FAILED;
 			Mark_Sock_Fail(a_pstIPConnect);
 			break;
 		}
@@ -1746,7 +1746,7 @@ ERRORCODE Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket, IP_Con
 		if(0 != addReqToList(pstMBusRequesPacket))
 		{
 			printf("Unable to add request for timeout tracking. marking it as failed.\n");
-			u8ReturnType = MBUS_STACK_ERROR_FAILED_Q_SENT_REQ;
+			u8ReturnType =  STS_MBUS_STACK_ERROR_FAILED_Q_SENT_REQ;
 			break;
 		}
 

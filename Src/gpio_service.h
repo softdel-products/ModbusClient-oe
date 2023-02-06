@@ -44,24 +44,13 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
-#include "ERRORCODE.h"
-/*
-typedef enum{
-	//NO_ERROR,
-	//ERROR_INVALID_FD,
-	ERROR_READ_GPIO,
-	ERROR_WRITE_GPIO,
-	//ERROR_INVALID_POINTER,
-	GPIO_HIGH,
-	GPIO_LOW,
-	INAVLID_GPIO_STATE,
-	//FAILED
-}eRETURN_STATUS;
-*/
+#include "Common.h"
+
 char DirCtrlPin[3];
-GPIO_EXPORT ERRORCODE SetGPIODirection(char *gpioPin, char *value);
-GPIO_EXPORT ERRORCODE ReadGPIO(char *gpioPin, char *value);
-GPIO_EXPORT ERRORCODE SetValuveDirPin(char *gpio, ERRORCODE eGPIO_STATE);
+
+GPIO_EXPORT t_Status SetGPIODirection(char *gpioPin, char *value);
+GPIO_EXPORT t_Status ReadGPIO(char *gpioPin, char *value);
+GPIO_EXPORT t_Status SetValuveDirPin(char *gpio, t_Status eGPIO_STATE);
 
 
 #endif /* LED_BOOTSWITCH_SERVICE_H_ */

@@ -30,7 +30,7 @@
 #include <safe_lib.h>
 #include <unistd.h>
 #include <time.h>
-#include "ERRORCODE.h"
+#include "Common.h"
 #include "gpio_service.h"	//Add for NHP board to togle Dir Pin
 
 #define UART2 "/dev/apalis-uart2"
@@ -81,12 +81,12 @@ extern stLiveSerSessionList_t *pstSesCtlThdLstHead;
  * @return uint8_t [out] MBUS_STACK_NO_ERROR if function succeeds,
  * 						 MBUS_STACK_ERROR_STACK_IS_ALREADY_INITIALIZED if stack is already initialized
  */
-MODBUS_STACK_EXPORT ERRORCODE AppMbusMaster_SetStackConfigParam(stDevConfig_t *a_pstDevConf)
+MODBUS_STACK_EXPORT t_Status AppMbusMaster_SetStackConfigParam(stDevConfig_t *a_pstDevConf)
 {
 	// check stack status and return stack error code
 	if(g_bIsStackEnable)
 	{
-		return MBUS_STACK_ERROR_STACK_IS_ALREADY_INITIALIZED;
+		return STS_MBUS_STACK_ERROR_STACK_IS_ALREADY_INITIALIZED;
 	}
 	if(a_pstDevConf != NULL)
 	{
@@ -116,7 +116,7 @@ MODBUS_STACK_EXPORT ERRORCODE AppMbusMaster_SetStackConfigParam(stDevConfig_t *a
 	printf("response timeout is set to :: %ld us\n", g_stModbusDevConfig.m_lResponseTimeout);
 	printf("Interframe delay is set to :: %ld us\n\n", g_stModbusDevConfig.m_lInterframedelay);
 
-	return MBUS_STACK_NO_ERROR;
+	return STS_MBUS_STACK_NO_ERROR;
 } // AppMbusMaster_SetStackConfigParam
 
 /**
@@ -149,31 +149,31 @@ MODBUS_STACK_EXPORT stDevConfig_t* AppMbusMaster_GetStackConfigParam()
  * 						 MBUS_STACK_NO_ERROR in case of success
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE AppMbusMaster_StackInit()
+MODBUS_STACK_EXPORT t_Status AppMbusMaster_StackInit()
 {
 	//Local variable
-	ERRORCODE eStatus = SUCCESS;
+	t_Status eStatus = STS_OK;
 	g_bThreadExit = false;
 
 	// if initRespStructs is -1 then MBUS_STACK_INIT_FAILED (stack error code)
 	if(-1 == initRespStructs())
 	{
 		printf("failed to init initTCPRespStructs\n");
-		eStatus = MBUS_STACK_INIT_FAILED;
+		eStatus = STS_MBUS_STACK_INIT_FAILED;
 	}
 	// Mutex for session control list is NULL then MBUS_STACK_ERROR_MUTEX_CREATE (stack error code)
 	LivSerSesslist_Mutex = Osal_Mutex();
 	if(NULL == LivSerSesslist_Mutex)
 	{
-		eStatus = MBUS_STACK_ERROR_MUTEX_CREATE;
+		eStatus = STS_MBUS_STACK_ERROR_MUTEX_CREATE;
 	}
 	// Initialize request manager and data structure
 	if(!initReqManager())
 	{
-		eStatus = MBUS_STACK_INIT_FAILED;
+		eStatus = STS_MBUS_STACK_INIT_FAILED;
 	}
 
-	if(MBUS_STACK_NO_ERROR == eStatus)
+	if(STS_MBUS_STACK_NO_ERROR == eStatus)
 	{
 		// set the stack enable status as true
 		g_bIsStackEnable = true;
@@ -608,34 +608,34 @@ uint8_t CreateHeaderForDevIdentificationModbusRequest(uint8_t u8UnitId,
  *									  MBUS_STACK_NO_ERROR in case of all parameters are valid
  *
  */
-ERRORCODE InputParameterVerification(uint16_t u16StartCoilOrReg, uint16_t u16NumberOfcoilsOrReg,
+t_Status InputParameterVerification(uint16_t u16StartCoilOrReg, uint16_t u16NumberOfcoilsOrReg,
 		uint8_t u8UnitID, void* pFunCallBack, uint8_t u8FunctionCode, uint8_t u8ByteCount)
 {
 	//check for null pointer
 	if (NULL == pFunCallBack)
 	{
 		//printf("MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER 0");
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 	//Maximum allowed slave 0- 247
 	if((0 == u8UnitID) || ((u8UnitID >= 248) && (u8UnitID < 255)))
 	{
 		//printf("MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER 1");
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 	// validate quantity
 	if(ValidateQuantity(u8FunctionCode,u16NumberOfcoilsOrReg,u8ByteCount))
 	{
 		//printf("MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER 2");
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
-	return MBUS_STACK_NO_ERROR;
+	return STS_MBUS_STACK_NO_ERROR;
 } // End of InputParameterVerification
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Read_Coils(uint16_t u16StartCoil,
 											  uint16_t u16NumOfcoils,
 											  uint16_t u16TransacID,
 											  uint8_t u8UnitId,
@@ -676,7 +676,7 @@ ERRORCODE InputParameterVerification(uint16_t u16StartCoilOrReg, uint16_t u16Num
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Coils(uint16_t u16StartCoil,
 											  uint16_t u16NumOfcoils,
 											  uint16_t u16TransacID,
 											  uint8_t u8UnitId,
@@ -684,7 +684,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 											  int32_t i32Ctx,
 											  void* pFunCallBack)
 {
-	ERRORCODE	u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status	u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = READ_COIL_STATUS;
 	uint16_t u16HeaderLength = 0;
@@ -698,7 +698,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 
 	//Input parameter verification for read coils
 	u8ReturnType = InputParameterVerification(u16StartCoil, u16NumOfcoils, u8UnitId, pFunCallBack, u8FunctionCode,0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -707,7 +707,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 	// assign transaction ID
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -747,7 +747,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 	// Post the request into message queue
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -755,7 +755,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
 } // End of Modbus_Read_Coils
 
 /**
- * @fn  MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
+ * @fn  MODBUS_STACK_EXPORT t_Status Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 														uint16_t u16NumOfDI,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -796,7 +796,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Coils(uint16_t u16StartCoil,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 														uint16_t u16NumOfDI,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -804,7 +804,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 														int32_t i32Ctx,
 														void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = READ_INPUT_STATUS;
 	uint16_t u16HeaderLength = 0;
@@ -818,7 +818,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 
 	// verify the input paramters for descrete inputs
 	u8ReturnType = InputParameterVerification(u16StartDI, u16NumOfDI, u8UnitId, pFunCallBack, u8FunctionCode, 0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -826,7 +826,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 	pstMBusRequesPacket = emplaceNewRequest(tsReqRcvd);
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
 
@@ -874,7 +874,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 	// Post the request into message queue
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -883,7 +883,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
 } // End of Modbus_Read_Discrete_Inputs
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Read_Holding_Registers(uint16_t u16StartReg,
 														  uint16_t u16NumberOfRegisters,
 														  uint16_t u16TransacID,
 														  uint8_t u8UnitId,
@@ -923,7 +923,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Discrete_Inputs(uint16_t u16StartDI,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Holding_Registers(uint16_t u16StartReg,
 														  uint16_t u16NumberOfRegisters,
 														  uint16_t u16TransacID,
 														  uint8_t u8UnitId,
@@ -931,7 +931,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 														  int32_t i32Ctx,
 														  void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = READ_HOLDING_REG;
 	uint16_t u16HeaderLength = 0;
@@ -944,7 +944,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16StartReg, u16NumberOfRegisters, u8UnitId, pFunCallBack, u8FunctionCode,0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -953,7 +953,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -998,7 +998,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1006,7 +1006,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
 } // End of Modbus_Read_Holding_Registers
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Read_Input_Registers(uint16_t u16StartReg,
 													    uint16_t u16NumberOfRegisters,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -1046,7 +1046,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Holding_Registers(uint16_t u16StartReg
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Input_Registers(uint16_t u16StartReg,
 													    uint16_t u16NumberOfRegisters,
 														uint16_t u16TransacID,
 														uint8_t u8UnitId,
@@ -1054,7 +1054,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 														int32_t i32Ctx,
 														void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = READ_INPUT_REG;
 	uint16_t u16HeaderLength = 0;
@@ -1068,7 +1068,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16StartReg, u16NumberOfRegisters, u8UnitId, pFunCallBack, u8FunctionCode, 0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1076,7 +1076,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -1125,7 +1125,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 	// Post the request into message queue
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1133,7 +1133,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
 } // End of Modbus_Read_Input_Registers
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 													 uint16_t u16OutputVal,
 													 uint16_t u16TransacID,
 													 uint8_t u8UnitId,
@@ -1173,7 +1173,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Input_Registers(uint16_t u16StartReg,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 													 uint16_t u16OutputVal,
 													 uint16_t u16TransacID,
 													 uint8_t u8UnitId,
@@ -1181,7 +1181,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 													 int32_t i32Ctx,
 													 void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = WRITE_SINGLE_COIL;
 	uint16_t u16HeaderLength = 0;
@@ -1194,7 +1194,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16StartCoil,u16OutputVal, u8UnitId, pFunCallBack, u8FunctionCode,0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1203,7 +1203,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -1246,7 +1246,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1254,7 +1254,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
 } // End of Modbus_Write_Single_Coil
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Register(uint16_t u16StartReg,
 														 uint16_t u16RegOutputVal,
 														 uint16_t u16TransacID,
 														 uint8_t u8UnitId,
@@ -1294,7 +1294,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Coil(uint16_t u16StartCoil,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Single_Register(uint16_t u16StartReg,
 														 uint16_t u16RegOutputVal,
 														 uint16_t u16TransacID,
 														 uint8_t u8UnitId,
@@ -1302,7 +1302,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 														 int32_t i32Ctx,
 														 void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = WRITE_SINGLE_REG;
 	uint16_t u16HeaderLength = 0;
@@ -1315,7 +1315,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16StartReg, u16RegOutputVal, u8UnitId, pFunCallBack, u8FunctionCode,0);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1323,7 +1323,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -1366,7 +1366,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		//free(pstMBusRequesPacket);
 		freeReqNode(pstMBusRequesPacket);
 	}
@@ -1375,7 +1375,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
 } // End of Modbus_Write_Single_Register
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 									   uint16_t u16NumOfCoil,
 									   uint16_t u16TransacID,
 									   uint8_t  *pu8OutputVal,
@@ -1418,7 +1418,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Single_Register(uint16_t u16StartReg,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 									   uint16_t u16NumOfCoil,
 									   uint16_t u16TransacID,
 									   uint8_t  *pu8OutputVal,
@@ -1427,7 +1427,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 									   int32_t i32Ctx,
 									   void*    pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8FunctionCode = WRITE_MULTIPLE_COILS;
 	uint16_t u16HeaderLength = 0;
@@ -1442,7 +1442,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16Startcoil, u16NumOfCoil, u8UnitId, pFunCallBack, u8FunctionCode,u8ByteCount);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1450,7 +1450,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
 #ifdef MODBUS_STACK_TCPIP_ENABLED
@@ -1476,7 +1476,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 		if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 		{
 			freeReqNode(pstMBusRequesPacket);
-			return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+			return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 		}
 		pstMBusRequesPacket->m_stMbusTxData.m_au8DataFields[u16PacketIndex++] =
 				*pu8OutputVal;
@@ -1495,7 +1495,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 	if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 	{
 		freeReqNode(pstMBusRequesPacket);
-		return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 	}
 
 	pstMBusRequesPacket->m_lPriority = lPriority;
@@ -1506,7 +1506,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1514,7 +1514,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
 } // End of Modbus_Write_Multiple_Coils
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartReg,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Register(uint16_t u16StartReg,
 									   uint16_t u16NumOfReg,
 									   uint16_t u16TransacID,
 									   uint8_t  *pu8OutputVal,
@@ -1557,7 +1557,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Coils(uint16_t u16Startcoil,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartReg,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_Multiple_Register(uint16_t u16StartReg,
 									   uint16_t u16NumOfReg,
 									   uint16_t u16TransacID,
 									   uint8_t  *pu8OutputVal,
@@ -1566,7 +1566,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 									   int32_t i32Ctx,
 									   void*    pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t  u8ByteCount = ((u16NumOfReg * 2) > 246)?246:(u16NumOfReg * 2);
 	uint8_t u8FunctionCode = WRITE_MULTIPLE_REG;
@@ -1581,7 +1581,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 	timespec_get(&tsReqRcvd, TIME_UTC);
 
 	u8ReturnType = InputParameterVerification(u16StartReg, u16NumOfReg, u8UnitId, pFunCallBack, u8FunctionCode,u8ByteCount);
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1589,7 +1589,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
 #ifdef MODBUS_STACK_TCPIP_ENABLED
@@ -1626,7 +1626,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 		if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 		{
 			freeReqNode(pstMBusRequesPacket);
-			return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+			return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 		}
 		pstMBusRequesPacket->m_stMbusTxData.m_au8DataFields[u16PacketIndex++] =
 					stEndianess.stByteOrder.u8FirstByte;
@@ -1641,7 +1641,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 	if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 	{
 		freeReqNode(pstMBusRequesPacket);
-		return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 	}
 
 	pstMBusRequesPacket->m_lPriority = lPriority;
@@ -1652,7 +1652,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1660,7 +1660,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
 } // End of Modbus_Write_Multiple_Register
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Read_File_Record(uint8_t u8byteCount,
 													uint8_t u8FunCode,
 													stMbusReadFileRecord_t *pstFileRecord,
 													uint16_t u16TransacID,
@@ -1702,7 +1702,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_Multiple_Register(uint16_t u16StartRe
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_File_Record(uint8_t u8byteCount,
 													uint8_t u8FunCode,
 													stMbusReadFileRecord_t *pstFileRecord,
 													uint16_t u16TransacID,
@@ -1711,7 +1711,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 													int32_t i32Ctx,
 													void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	//uint8_t u8FunctionCode = u8FunCode;
 	stEndianess_t stEndianess = { 0 };
@@ -1729,7 +1729,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 			u8FunCode,
 			0);
 
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1738,7 +1738,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -1789,7 +1789,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 		if(FILE_RECORD_REFERENCE_TYPE != pstFileRecord->m_u8RefType)
 		{
 			freeReqNode(pstMBusRequesPacket);
-			return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+			return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 		}
 
 		stEndianess.u16word = pstFileRecord->m_u16FileNum;
@@ -1824,7 +1824,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 	if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 	{
 		freeReqNode(pstMBusRequesPacket);
-		return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 	}
 
 	pstMBusRequesPacket->m_lPriority = lPriority;
@@ -1835,7 +1835,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -1843,7 +1843,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
 } // End of Modbus_Read_File_Record
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 													 uint8_t u8FunCode,
 													 stWrFileSubReq_t *pstFileRecord,
 													 uint16_t u16TransacID,
@@ -1886,7 +1886,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_File_Record(uint8_t u8byteCount,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
+MODBUS_STACK_EXPORT t_Status Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 													 uint8_t u8FunCode,
 													 stWrFileSubReq_t *pstFileRecord,
 													 uint16_t u16TransacID,
@@ -1895,7 +1895,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 													 int32_t i32Ctx,
 													 void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t	u8TempCount = 0;
 	stEndianess_t stEndianess = { 0 };
@@ -1913,7 +1913,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 			u8FunCode,
 			0);
 
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		return u8ReturnType;
 	}
@@ -1922,7 +1922,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -1973,7 +1973,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 		if(FILE_RECORD_REFERENCE_TYPE != pstFileRecord->m_u8RefType)
 		{
 			freeReqNode(pstMBusRequesPacket);
-			return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+			return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 		}
 
 		stEndianess.u16word = pstFileRecord->m_u16FileNum;
@@ -2018,7 +2018,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 	if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 	{
 		freeReqNode(pstMBusRequesPacket);
-		return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 	}
 
 	pstMBusRequesPacket->m_lPriority = lPriority;
@@ -2029,7 +2029,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -2037,7 +2037,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
 } // End of Modbus_Write_File_Record
 
 /**
- * @fn MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
+ * @fn MODBUS_STACK_EXPORT t_Status Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
 									uint8_t u8FunCode,
 									uint16_t u16NoOfReadReg,
 									uint16_t u16WriteRegAddress,
@@ -2087,7 +2087,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Write_File_Record(uint8_t u8ReqDataLen,
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Write_Registers(uint16_t u16ReadRegAddress,
 									uint8_t u8FunCode,
 									uint16_t u16NoOfReadReg,
 									uint16_t u16WriteRegAddress,
@@ -2099,7 +2099,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 									int32_t i32Ctx,
 									void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	uint8_t u8WriteByteCount = ((u16NoOfWriteReg * 2) > 244)?244:(u16NoOfWriteReg * 2);
 	uint16_t *pu16OutputVal = (uint16_t *)pu8OutputVal;
@@ -2118,7 +2118,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 			pFunCallBack,
 			READ_HOLDING_REG,
 			0);
-		if(MBUS_STACK_NO_ERROR != u8ReturnType)
+		if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 			return u8ReturnType;
 	}
@@ -2126,7 +2126,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -2155,7 +2155,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 			READ_WRITE_MUL_REG,
 			u8WriteByteCount);
 
-	if(MBUS_STACK_NO_ERROR != u8ReturnType)
+	if(STS_MBUS_STACK_NO_ERROR != u8ReturnType)
 	{
 		freeReqNode(pstMBusRequesPacket);
 		return u8ReturnType;
@@ -2193,7 +2193,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 		if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 		{
 			freeReqNode(pstMBusRequesPacket);
-			return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+			return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 		}
 		pstMBusRequesPacket->m_stMbusTxData.m_au8DataFields[u16PacketIndex++] =
 					stEndianess.stByteOrder.u8FirstByte;
@@ -2206,7 +2206,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 	pstMBusRequesPacket->pFunc = pFunCallBack;
 
 	if(NULL == pu8OutputVal && u8WriteByteCount > 0)
-		u8ReturnType = MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		u8ReturnType = STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 
 #ifndef MODBUS_STACK_TCPIP_ENABLED
 	pstMBusRequesPacket->m_u8ReceivedDestination = u8UnitId;
@@ -2215,7 +2215,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 	if(u16PacketIndex >= TCP_MODBUS_ADU_LENGTH)
 	{
 		freeReqNode(pstMBusRequesPacket);
-		return MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PACKET_LENGTH_EXCEEDED;
 	}
 
 	pstMBusRequesPacket->m_lPriority = lPriority;
@@ -2226,7 +2226,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -2279,7 +2279,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Write_Registers(uint16_t u16ReadRegAdd
  *							  MBUS_STACK_NO_ERROR in case of successful execution of the operation
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEIType,
+MODBUS_STACK_EXPORT t_Status Modbus_Read_Device_Identification(uint8_t u8MEIType,
 		uint8_t u8FunCode,
 		uint8_t u8ReadDevIdCode,
 		uint8_t u8ObjectId,
@@ -2289,7 +2289,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEITyp
 		int32_t i32Ctx,
 		void* pFunCallBack)
 {
-	ERRORCODE u8ReturnType = MBUS_STACK_NO_ERROR;
+	t_Status u8ReturnType = STS_MBUS_STACK_NO_ERROR;
 	uint16_t u16PacketIndex = 0;
 	stMbusPacketVariables_t *pstMBusRequesPacket = NULL;
 	Post_Thread_Msg_t stPostThreadMsg = { 0 };
@@ -2301,7 +2301,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEITyp
 
 	if(NULL == pFunCallBack)
 	{
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 	// Maximum allowed slave 1- 247 or 255
@@ -2309,27 +2309,27 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEITyp
 	// Maximum allowed slave 1- 247
 	// if(u8UnitId > MAX_ALLOWED_SLAVES )
 	{
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 	// Validate MEI type
 	if(u8MEIType != MEI_TYPE)
 	{
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 	// Validate read device id code type
 	if((u8ReadDevIdCode == 1) && (u8ReadDevIdCode == 2) && (u8ReadDevIdCode == 3)
 			&& (u8ReadDevIdCode == 4))
 	{
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 	pstMBusRequesPacket = emplaceNewRequest(tsReqRcvd);
 
 	if(NULL == pstMBusRequesPacket)
 	{
-		return MBUS_STACK_ERROR_MAX_REQ_SENT;
+		return STS_MBUS_STACK_ERROR_MAX_REQ_SENT;
 	}
 
 	pstMBusRequesPacket->m_u16AppTxID = u16TransacID;
@@ -2375,7 +2375,7 @@ MODBUS_STACK_EXPORT ERRORCODE Modbus_Read_Device_Identification(uint8_t u8MEITyp
 
 	if(!OSAL_Post_Message(&stPostThreadMsg))
 	{
-		u8ReturnType = MBUS_STACK_ERROR_QUEUE_SEND;
+		u8ReturnType = STS_MBUS_STACK_ERROR_QUEUE_SEND;
 		freeReqNode(pstMBusRequesPacket);
 	}
 
@@ -2425,9 +2425,9 @@ bool validateBaudRate(uint32_t nBaudRate)
  * 									  received from ModbusApp
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
+MODBUS_STACK_EXPORT t_Status getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 {
-	ERRORCODE retError = MBUS_STACK_NO_ERROR;
+	t_Status retError = STS_MBUS_STACK_NO_ERROR;
 	thread_Create_t stThreadParam = { 0 };
 	Thread_H threadId;
 	stLiveSerSessionList_t *pstLivSerSesslist = NULL;
@@ -2435,7 +2435,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 
 	if(NULL == pCtx || NULL == pCtxInfo)
 	{
-		return MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
+		return STS_MBUS_STACK_ERROR_INVALID_INPUT_PARAMETER;
 	}
 
 #ifndef MODBUS_STACK_TCPIP_ENABLED
@@ -2490,7 +2490,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 						pCtxInfo->u16Port == pstLivSerSesslist->m_u16Port)
 				{
 					*pCtx = pstLivSerSesslist->MsgQId;
-					retError = MBUS_STACK_NO_ERROR;
+					retError = STS_MBUS_STACK_NO_ERROR;
 					break;
 				}
 #else
@@ -2528,7 +2528,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 			pstLivSerSesslist = OSAL_Malloc(sizeof(stLiveSerSessionList_t));
 			if(NULL == pstLivSerSesslist)
 			{
-				retError = MBUS_STACK_ERROR_MALLOC_FAILED;
+				retError = STS_MBUS_STACK_ERROR_MALLOC_FAILED;
 			}
 			else
 			{
@@ -2558,7 +2558,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 			pstLivSerSesslist->MsgQId = OSAL_Init_Message_Queue();	// generating message Queue id
 			if(-1 == pstLivSerSesslist->MsgQId)
 			{
-				retError = MBUS_STACK_ERROR_QUEUE_CREATE;
+				retError = STS_MBUS_STACK_ERROR_QUEUE_CREATE;
 			}
 			else
 			{
@@ -2574,12 +2574,12 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 				threadId = Osal_Thread_Create(&stThreadParam);
 				if(0 == threadId)
 				{
-					retError = MBUS_STACK_ERROR_THREAD_CREATE;
+					retError = STS_MBUS_STACK_ERROR_THREAD_CREATE;
 					OSAL_Delete_Message_Queue(pstLivSerSesslist->MsgQId);
 				}
 				else
 				{
-					retError = MBUS_STACK_NO_ERROR;
+					retError = STS_MBUS_STACK_NO_ERROR;
 					*pCtx = pstLivSerSesslist->MsgQId;
 				}
 			}
@@ -2587,7 +2587,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 	} while(0);
 	
 	// Check if any error occurred
-	if(retError != MBUS_STACK_NO_ERROR)
+	if(retError != STS_MBUS_STACK_NO_ERROR)
 	{
 		// Check if memory to be released
 		if((NULL != pstLivSerSesslist) && u8NewDevEntryFalg)
@@ -2618,7 +2618,7 @@ MODBUS_STACK_EXPORT ERRORCODE getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
  * 									  received from ModbusApp
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE getTCPCtx(int *tcpCtx, stCtxInfo *pCtxInfo)
+MODBUS_STACK_EXPORT t_Status getTCPCtx(int *tcpCtx, stCtxInfo *pCtxInfo)
 {
 	return getCtx(tcpCtx, pCtxInfo);
 } // End of getTCPCtx
@@ -2636,7 +2636,7 @@ MODBUS_STACK_EXPORT ERRORCODE getTCPCtx(int *tcpCtx, stCtxInfo *pCtxInfo)
  * 									  received from ModbusApp
  *
  */
-MODBUS_STACK_EXPORT ERRORCODE getRTUCtx(int32_t *rtuCtx, stCtxInfo *pCtxInfo)
+MODBUS_STACK_EXPORT t_Status getRTUCtx(int32_t *rtuCtx, stCtxInfo *pCtxInfo)
 {
 	return getCtx(rtuCtx, pCtxInfo);
 } // End of getRTUCtx
