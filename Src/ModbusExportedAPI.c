@@ -2442,12 +2442,12 @@ MODBUS_STACK_EXPORT t_Status getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 	int nPortNameLen = strnlen_s((const char*)pCtxInfo->m_u8PortName, MODBUS_DATA_LENGTH);
 	if(nPortNameLen >= MODBUS_DATA_LENGTH)
 	{
-		return MBUS_STACK_ERROR_PORT_NAME_LENGTH_EXCEEDED;
+		return STS_MBUS_STACK_ERROR_PORT_NAME_LENGTH_EXCEEDED;
 	}
 
 	if(!validateBaudRate(pCtxInfo->m_u32baudrate))
 	{
-		return MBUS_STACK_ERROR_INVALID_BAUD_RATE;
+		return STS_MBUS_STACK_ERROR_INVALID_BAUD_RATE;
 	}
 
 	#ifdef MODBUS_CLIENT_STACK_RUN_ON_BOARD
@@ -2466,7 +2466,7 @@ MODBUS_STACK_EXPORT t_Status getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 			memcpy_s((void*)DirCtrlPin,(rsize_t) sizeof(DirCtrlPin),(void*)"435",(rsize_t) strlen("435"));
 		}
 		InitDirPin(DirCtrlPin);
-		SetValuveDirPin(DirCtrlPin, MBUS_GPIO_LOW);
+		SetValuveDirPin(DirCtrlPin, STS_MBUS_GPIO_LOW);
 	#endif
 
 #endif
@@ -2503,13 +2503,13 @@ MODBUS_STACK_EXPORT t_Status getCtx(int32_t *pCtx, stCtxInfo *pCtxInfo)
 					{
 						// Context is already available for given configuration
 						*pCtx = pstLivSerSesslist->MsgQId;
-						retError = MBUS_STACK_NO_ERROR;
+						retError = STS_MBUS_STACK_NO_ERROR;
 						break;
 					}
 					else
 					{
 						// Port name is same. But other configuration is wrong
-						retError = MBUS_STACK_ERROR_SERIAL_PORT_ALREADY_IN_USE;
+						retError = STS_MBUS_STACK_ERROR_SERIAL_PORT_ALREADY_IN_USE;
 						break;
 					}
 				}

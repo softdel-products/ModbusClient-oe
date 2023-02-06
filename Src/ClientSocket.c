@@ -1028,7 +1028,7 @@ t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 
 #ifdef MODBUS_CLIENT_STACK_RUN_ON_BOARD
 	//Add for NHP board to togle Dir Pin
-	SetValuveDirPin(DirCtrlPin, MBUS_GPIO_LOW);
+	SetValuveDirPin(DirCtrlPin, STS_MBUS_GPIO_LOW);
 #endif
 	usleep(100);
 	if(NULL == pstMBusRequesPacket)
@@ -1062,7 +1062,7 @@ t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 		//Add for NHP board to togle Dir Pin
 		usleep(rtuConnectionData.onebyte_time * pstMBusRequesPacket->m_stMbusTxData.m_u16Length + 100);
 #ifdef MODBUS_CLIENT_STACK_RUN_ON_BOARD
-		SetValuveDirPin(DirCtrlPin, MBUS_GPIO_HIGH);
+		SetValuveDirPin(DirCtrlPin, STS_MBUS_GPIO_HIGH);
 #endif
 		usleep(100);
 		// Init req sent timestamp
@@ -1162,12 +1162,12 @@ t_Status Modbus_SendPacket(stMbusPacketVariables_t *pstMBusRequesPacket,
 			if (0 == iBlockingReadResult)
 			{
 				pstMBusRequesPacket->m_state = RESP_TIMEDOUT;
-				u8ReturnType = MBUS_STACK_ERROR_RECV_TIMEOUT;
+				u8ReturnType = STS_MBUS_STACK_ERROR_RECV_TIMEOUT;
 			}
 			else
 			{
 				pstMBusRequesPacket->m_state = RESP_ERROR;
-				u8ReturnType = MBUS_STACK_ERROR_RECV_FAILED;
+				u8ReturnType = STS_MBUS_STACK_ERROR_RECV_FAILED;
 			}
 		}
 	}

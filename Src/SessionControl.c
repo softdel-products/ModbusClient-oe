@@ -818,7 +818,7 @@ void* SessionControlThread(void* threadArg)
 				if(-1 == ret)
 				{
 					stRTUConnectionData.m_fd = -1;
-					pstMBusReqPact->m_u8ProcessReturn = MBUS_STACK_ERROR_SERIAL_PORT_ERROR;
+					pstMBusReqPact->m_u8ProcessReturn = STS_MBUS_STACK_ERROR_SERIAL_PORT_ERROR;
 					printf("Failed to initialize serial port for RTU. File descriptor is set to :: %d\n",stRTUConnectionData.m_fd);
 					addToRespQ(pstMBusReqPact);
 					continue;
