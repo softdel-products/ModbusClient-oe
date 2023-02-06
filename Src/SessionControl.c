@@ -1224,7 +1224,7 @@ void* timeoutActionThread(void* threadArg)
 			if(true ==
 					atomic_compare_exchange_strong(&pstCur->m_state, &expected, RESP_TIMEDOUT))
 			{
-				pstCur->m_u8ProcessReturn = MBUS_STACK_ERROR_RECV_TIMEOUT;
+				pstCur->m_u8ProcessReturn = STS_MBUS_STACK_ERROR_RECV_TIMEOUT;
 				pstCur->m_stMbusRxData.m_u8Length = 0;
 				// Init resp received timestamp
 				timespec_get(&(pstCur->m_objTimeStamps.tsRespRcvd), TIME_UTC);
